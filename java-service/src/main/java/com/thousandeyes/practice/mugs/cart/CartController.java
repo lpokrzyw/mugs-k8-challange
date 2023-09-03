@@ -3,8 +3,13 @@ package com.thousandeyes.practice.mugs.cart;
 import com.thousandeyes.practice.mugs.mugs.Mug;
 import com.thousandeyes.practice.mugs.mugs.MugRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class CartController {
@@ -39,9 +44,32 @@ public class CartController {
         return null;
     }
 
+//    @PostMapping(
+//            value = "/updatePerson", consumes = "application/json", produces = "application/json")
+//    public Person updatePerson(@RequestBody Person person, HttpServletResponse response) {
+//        response.setHeader("Location", ServletUriComponentsBuilder.fromCurrentContextPath()
+//                .path("/findPerson/" + person.getId()).toUriString());
+//
+//        return personService.saveUpdatePerson(person);
+//    }
     @PostMapping(path = "/checkout")
-    public Void processOrder() {
-        updateCartTotal(0);
-        return null;
+    public void processOrder() {
+        final String url = "http://localhost:8889";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("cartTotal", String.valueOf(retrieveCart(CART_ID).getCartTotal()));
+
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestBody, String.class);
+
+        HttpStatus statusCode = (HttpStatus) responseEntity.getStatusCode();
+        if (statusCode == HttpStatus.ACCEPTED) {
+            System.out.println(responseEntity.getBody());
+        }
     }
 }
