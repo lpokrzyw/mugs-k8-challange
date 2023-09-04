@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: prod
+  name: prod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: java-service
+  name: java-service
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-service
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: java-service
+    spec:
+      containers:
+        - image: lpokrzyw/friday-java-service:v1
+          imagePullPolicy: IfNotPresent
+          name: friday-java-service
+          ports:
+            - containerPort: 8888
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: java-service
+  name: java-service-svc
+  namespace: prod
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8888
+  selector:
+    app: java-service
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: node-service
+  name: node-service
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-service
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: node-service
+    spec:
+      containers:
+        - image: lpokrzyw/friday-node-service:v1
+          imagePullPolicy: IfNotPresent
+          name: friday-node-service
+          ports:
+            - containerPort: 8889
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: node-service
+  name: node-service-svc
+  namespace: prod
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8889
+  selector:
+    app: node-service
+  type: ClusterIP
