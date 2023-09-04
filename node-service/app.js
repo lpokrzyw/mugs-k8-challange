@@ -14,6 +14,10 @@ app.post('/', (req, res) => {
   const appName = JSON.stringify(req.body);
 })
 
+app.get('/healthz', (req, res) => {
+  res.status(200).send('{"status":"UP"}');
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

@@ -44,14 +44,7 @@ public class CartController {
         return null;
     }
 
-//    @PostMapping(
-//            value = "/updatePerson", consumes = "application/json", produces = "application/json")
-//    public Person updatePerson(@RequestBody Person person, HttpServletResponse response) {
-//        response.setHeader("Location", ServletUriComponentsBuilder.fromCurrentContextPath()
-//                .path("/findPerson/" + person.getId()).toUriString());
-//
-//        return personService.saveUpdatePerson(person);
-//    }
+
     @PostMapping(path = "/checkout")
     public void processOrder() {
         final String url = "http://localhost:8889";
