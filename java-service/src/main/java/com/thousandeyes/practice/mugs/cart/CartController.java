@@ -47,7 +47,7 @@ public class CartController {
 
     @PostMapping(path = "/checkout")
     public void processOrder() {
-        final String url = "http://localhost:8889";
+        final String url = "http://node-service-svc:80";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
