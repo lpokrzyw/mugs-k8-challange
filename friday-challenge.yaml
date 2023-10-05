@@ -2,8 +2,15 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    kubernetes.io/metadata.name: prod
-  name: prod
+    kubernetes.io/metadata.name: java-prod
+  name: java-prod
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: node-prod
+  name: node-prod
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -11,7 +18,7 @@ metadata:
   labels:
     app: java-service
   name: java-service
-  namespace: prod
+  namespace: java-prod
 spec:
   replicas: 1
   selector:
@@ -37,7 +44,7 @@ metadata:
   labels:
     app: java-service
   name: java-service-svc
-  namespace: prod
+  namespace: java-prod
 spec:
   ports:
     - port: 80
@@ -53,7 +60,7 @@ metadata:
   labels:
     app: node-service
   name: node-service
-  namespace: prod
+  namespace: node-prod
 spec:
   replicas: 1
   selector:
@@ -79,7 +86,7 @@ metadata:
   labels:
     app: node-service
   name: node-service-svc
-  namespace: prod
+  namespace: node-prod
 spec:
   ports:
     - port: 80
