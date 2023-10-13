@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: node-service
+  name: node-service
+  namespace: node-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-service
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: node-service
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - image: lpokrzyw/friday-node-service:v1
+          imagePullPolicy: Always
+          name: friday-node-service
+          ports:
+            - containerPort: 8889
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - "ALL"

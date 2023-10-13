@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: java-service
+  name: java-service
+  namespace: java-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-service
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: java-service
+    spec:
+      containers:
+        - image: lpokrzyw/friday-java-service:v2
+          imagePullPolicy: Always
+          name: friday-java-service
+          ports:
+            - containerPort: 8888
+              protocol: TCP
