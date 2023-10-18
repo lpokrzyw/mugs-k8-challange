@@ -49,12 +49,12 @@ metadata:
   namespace: java-prod
 spec:
   ports:
-    - port: 8091
+    - port: 80
       protocol: TCP
       targetPort: 8888
   selector:
     app: java-service
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
