@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  APPDYNAMICS_AGENT_ACCOUNT_NAME: ""
+  APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY: ""
+  APPDYNAMICS_AGENT_APPLICATION_NAME: ""
+  APPDYNAMICS_CONTROLLER_HOST_NAME: ""
+  APPDYNAMICS_CONTROLLER_PORT: "443"
+  APPDYNAMICS_CONTROLLER_SSL_ENABLED: "true"
+  APPDYNAMICS_SIM_ENABLED: "true"
+  APPDYNAMICS_DOCKER_ENABLED: "false"
+  APPDYNAMICS_AGENT_ENABLE_CONTAINERIDASHOSTID: "true" #optional
+  EUM_HOST: "https://col.eum-appdynamics.com"
+  EUM_KEY: ""
+  APPDYNAMICS_EVENTS_API_URL: "https://analytics.api.appdynamics.com" # this probably is not correct
+  EVENT_ENDPOINT: "https://analytics.api.appdynamics.com"
+  APPDYNAMICS_AGENT_GLOBAL_ACCOUNT_NAME: ""
+metadata:
+  name: controller-info
+  namespace: analytics
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: appd-infra-agent
+  namespace: analytics
+spec:
+  selector:
+    matchLabels:
+      name: appd-infra-agent
+  template:
+    metadata:
+      labels:
+        name: appd-infra-agent
+    spec:
+      serviceAccountName: appdynamics-infraviz
+      containers:
+        - name: appd-infra-agent
+          env:
+            - name: APPDYNAMICS_AGENT_UNIQUE_HOST_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          envFrom:
+            - configMapRef:
+                name: controller-info
+          securityContext:
+            privileged: true
+            # you may encounter file.AccessDeniedException and then run it as root user
+            # (which is not default in this official image)
+            runAsUser: 0
+          image: docker.io/appdynamics/machine-agent-analytics:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+            - containerPort: 5144
+              hostPort: 5144
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "0.6"
+              memory: "2Gi"
+            requests:
+              cpu: "0.3"
+              memory: "1G"
+          volumeMounts:
+            - mountPath: /hostroot
+              name: hostroot
+            # here we will be able to access logs, to test run:
+            # kubectl -n analytics exec -it <analytics-agent-pod-name> -- ls /var/log/containers/
+            - name: varlog
+              mountPath: /var/log
+      restartPolicy: Always
+      volumes:
+        - name: hostroot
+          hostPath:
+            path: /
+            type: Directory
+        # required to read logs from the host
+        - name: varlog
+          hostPath:
+            path: /var/log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appd-infra-agent-service
+  namespace: analytics
+spec:
+  selector:
+    name: appd-infra-agent
+  ports:
+    - name: "9090"
+      port: 9090
+      targetPort: 9090
+status:
+  loadBalancer: {}
